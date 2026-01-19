@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitamin Sea - Trip Super App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- ตั้งค่าพื้นฐาน (ปรับให้ตัวใหญ่ขึ้น) --- */
+        body { 
+            font-family: 'Kanit', sans-serif; 
+            background-color: #f0f2f5; 
+            margin: 0; padding: 0; 
+            color: #333; 
+            font-size: 18px; /* 🟢 เพิ่มขนาดตัวอักษรพื้นฐาน */
+        }
+        .container { max-width: 600px; margin: 0 auto; padding-bottom: 100px; }
+        
+        /* --- เมนูบาร์ (ปุ่มใหญ่ขึ้น) --- */
+        .nav-bar { 
+            display: flex; background: white; padding: 15px; 
+            position: sticky; top: 0; z-index: 1000; 
+            justify-content: center; gap: 10px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+            overflow-x: auto; 
+        }
+        .nav-btn { 
+            border: none; background: #f0f2f5; padding: 12px 20px; /* 🟢 ปุ่มใหญ่ขึ้น */
+            border-radius: 30px; cursor: pointer; 
+            font-family: 'Kanit'; font-size: 16px; /* 🟢 ตัวหนังสือเมนูใหญ่ขึ้น */
+            white-space: nowrap; transition: 0.3s; color: #666; font-weight: 500;
+        }
+        .nav-btn.active { 
+            background: linear-gradient(135deg, #007bff, #0056b3); 
+            color: white; box-shadow: 0 4px 10px rgba(0,123,255,0.3);
+        }
+
+        /* --- Tabs --- */
+        .tab-content { display: none; padding: 15px; animation: fadeIn 0.3s ease-in; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Cards & Inputs --- */
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        
+        h3 { margin-top: 0; color: #0056b3; text-align: center; font-weight: 600; font-size: 24px; /* 🟢 หัวข้อใหญ่ */ }
+        
+        input, select { 
+            width: 100%; padding: 16px; margin: 12px 0; /* 🟢 ช่องกรอกใหญ่ขึ้น */
+            border: 2px solid #e1e1e1; border-radius: 15px; 
+            box-sizing: border-box; font-family: 'Kanit'; 
+            font-size: 18px; /* 🟢 ตัวหนังสือในช่องกรอกใหญ่ */
+            background: #fdfdfd; 
+        }
+        input:focus, select:focus { border-color: #007bff; outline: none; background: white; }
+        
+        /* --- ปุ่มกด (ใหญ่สะใจ) --- */
+        button.main-btn { 
+            width: 100%; padding: 18px; /* 🟢 ปุ่มกดใหญ่ */
+            border: none; border-radius: 15px; 
+            font-size: 20px; /* 🟢 ตัวหนังสือปุ่มใหญ่ */
+            cursor: pointer; color: white; margin-top: 15px; 
+            font-family: 'Kanit'; font-weight: 600; 
+        }
+        button.main-btn:active { transform: scale(0.98); }
+        #btnSave { background: linear-gradient(135deg, #007bff, #0056b3); }
+        #btnCalculate { background: linear-gradient(135deg, #28a745, #218838); }
+        #btnClear { background: #ffebee; color: #d32f2f; margin-top: 40px; }
+        #btnExport { background: #17a2b8; color: white; margin-top: 15px; }
+
+        /* --- รายการประวัติ (อ่านง่าย) --- */
+        .history-item { 
+            background: white; padding: 20px; /* 🟢 เพิ่มพื้นที่ */
+            border-radius: 15px; margin-bottom: 15px; 
+            border: 1px solid #f0f0f0; display: flex; 
+            justify-content: space-between; align-items: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02); 
+        }
+        .history-item.paid { background: #e8f5e9; border-color: #c8e6c9; opacity: 0.7; }
+        .history-item.paid .title { text-decoration: line-through; color: #2e7d32; }
+        
+        /* --- Checkbox --- */
+        .checkbox-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; } /* 🟢 ปรับเหลือ 2 แถวให้กดง่าย */
+        .checkbox-item { 
+            background: #f8f9fa; padding: 12px; border-radius: 12px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 16px; border: 1px solid #eee; font-weight: 500;
+        }
+        input[type="checkbox"] { width: 24px; height: 24px; margin: 0 10px 0 0; accent-color: #007bff; } /* 🟢 กล่องติ๊กใหญ่ */
+        
+        /* --- Iframe Box --- */
+        .iframe-box { width: 100%; height: 85vh; border: none; border-radius: 12px; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    </style>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <button class="nav-btn active" onclick="switchTab('trip')">🗺️ Ours Trip</button>
+        <button class="nav-btn" onclick="switchTab('plan')">🗓️ Schedule</button>
+        <button class="nav-btn" onclick="switchTab('expense')">💰 หารเงิน</button>
+    </div>
+
+    <div id="tab-trip" class="tab-content active">
+        <iframe src="https://9nooey.github.io/Ours-Trip/" class="iframe-box" title="Ours Trip"></iframe>
+    </div>
+
+    <div id="tab-plan" class="tab-content">
+        <iframe src="https://9nooey.github.io/Travel-Planner/" class="iframe-box" title="Travel Planner"></iframe>
+    </div>
+
+    <div id="tab-expense" class="tab-content">
+        <div class="container">
+            <div class="card">
+                <h3>🌊 จดบิลค่าใช้จ่าย</h3>
+                <input type="text" id="item" placeholder="📝 รายการ (เช่น ค่าที่พัก)">
+                <input type="number" id="amount" placeholder="💵 จำนวนเงิน (บาท)">
+                
+                <label style="font-size:16px; color:#666; font-weight:bold;">👤 ใครสำรองจ่าย:</label>
+                <select id="payerSelect">
+                    <option value="Nooey">Nooey</option>
+                    <option value="Bookky">Bookky</option>
+                    <option value="Frame">Frame</option>
+                    <option value="Oum">Oum</option>
+                    <option value="Muse">Muse</option>
+                </select>
+
+                <label style="font-size:16px; color:#666; display:block; margin-top:15px; font-weight:bold;">👥 หารใครบ้าง:</label>
+                <div class="checkbox-group" id="consumersList">
+                    <label class="checkbox-item"><input type="checkbox" value="Nooey" checked> Nooey</label>
+                    <label class="checkbox-item"><input type="checkbox" value="Bookky" checked> Bookky</label>
+                    <label class="checkbox-item"><input type="checkbox" value="Frame" checked> Frame</label>
+                    <label class="checkbox-item"><input type="checkbox" value="Oum" checked> Oum</label>
+                    <label class="checkbox-item"><input type="checkbox" value="Muse" checked> Muse</label>
+                </div>
+
+                <label style="font-size:16px; color:#666; display:block; margin-top:15px; font-weight:bold;">📸 รูปสลิป (ถ้ามี):</label>
+                <input type="file" id="receiptFile" style="padding:10px;">
+                
+                <button id="btnSave" class="main-btn">💾 บันทึกรายการ</button>
+            </div>
+
+            <div id="historyListContainer">กำลังโหลดข้อมูล...</div>
+
+            <button id="btnCalculate" class="main-btn">💰 คำนวณยอดเคลียร์เงิน</button>
+            <button id="btnClear" class="main-btn">⚠️ ล้างข้อมูลทั้งหมด</button>
+
+            <div id="summary-card" style="display:none; background:white; margin-top:20px; padding:25px; border-radius:16px;">
+                <h3 style="border-bottom:2px solid #eee; padding-bottom:15px; margin-bottom:15px;">Vitamin Sea Summary 🌊</h3>
+                <div id="resultList"></div>
+                <div style="text-align:center; font-size:14px; color:#999; margin-top:20px;">Thank you for the trip!</div>
+            </div>
+            <button id="btnExport" class="main-btn" style="display:none; background:#17a2b8;">📸 Save รูปบิล</button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(name) {
+            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+            
+            document.getElementById('tab-'+name).classList.add('active');
+            
+            const btns = document.querySelectorAll('.nav-btn');
+            if(name=='trip') btns[0].classList.add('active');
+            if(name=='plan') btns[1].classList.add('active');
+            if(name=='expense') btns[2].classList.add('active');
+        }
+    </script>
+    <script type="module" src="./script.js"></script>
+</body>
+</html>
